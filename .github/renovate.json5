@@ -10,7 +10,7 @@
   "platform": "github",
   "username": "spirkaa-renovate[bot]",
   "repositories": ["spirkaa/containers"],
-  "includeForks": true,
+  "forkProcessing": "enabled",
   "onboarding": false,
   "requireConfig": "optional",
   "gitAuthor": "Renovate Bot <122151334+spirkaa-renovate[bot]@users.noreply.github.com>",
