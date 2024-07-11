@@ -106,7 +106,7 @@ jobs:
         run: sudo apt-get install -y moreutils jo
 
       - name: Setup CUE
-        uses: cue-lang/setup-cue@v1.0.0-alpha.2
+        uses: cue-lang/setup-cue@v1.0.1
 
       - name: Setup Goss
         if: ${{ steps.vars.outputs.chan_tests_enabled == 'true' }}
@@ -135,7 +135,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build container image for testing
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           build-args: |-
             VERSION=${{ steps.vars.outputs.chan_upstream_version }}
@@ -166,7 +166,7 @@ jobs:
 
       - name: Build all platforms
         id: release
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           build-args: |-
             VERSION=${{ steps.vars.outputs.chan_upstream_version }}
