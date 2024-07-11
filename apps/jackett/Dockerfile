@@ -1,42 +1,50 @@
-FROM ghcr.io/onedr0p/ubuntu:jammy-20240227@sha256:a79a3386914dfdf37d4d03173ab8bba51512305b3863ab178f2520ef27981083
+ARG VERSION
+FROM docker.io/library/alpine:3.20
 
 ARG TARGETPLATFORM
 ARG VERSION
 ARG CHANNEL
 
 ENV XDG_CONFIG_HOME=/config
+ENV UMASK="0002" \
+    TZ="Etc/UTC"
 
-# hadolint ignore=DL3008,DL3015,SC2039,SC2086
+USER root
+WORKDIR /app
+
+#hadolint ignore=DL3018,DL3059
 RUN \
-    apt-get -qq update \
-    && \
-    apt-get -qq install -y \
-        libicu70 \
+    apk add --no-cache \
+        bash \
+        ca-certificates \
+        catatonit \
+        curl \
+        icu-libs \
+        jq \
+        libintl \
+        nano \
+        sqlite-libs \
+        tzdata \
     && \
     case "${TARGETPLATFORM}" in \
         'linux/amd64') export ARCH='AMDx64' ;; \
         'linux/arm64') export ARCH='ARM64' ;; \
     esac \
     && \
-    curl -fsSL "https://github.com/Jackett/Jackett/releases/download/v${VERSION}/Jackett.Binaries.Linux${ARCH}.tar.gz" \
-        | tar ixzf - -C /app --strip-components 1 \
-    && \
-    rm -rf \
-        /app/JackettUpdater* \
-    && \
-    apt-get autoremove -y \
-    && apt-get clean \
-    && \
-    rm -rf \
-        /tmp/* \
-        /var/lib/apt/lists/* \
-        /var/tmp/ \
+    curl -fsSL "https://github.com/Jackett/Jackett/releases/download/v${VERSION}/Jackett.Binaries.LinuxMusl${ARCH}.tar.gz" \
+        | tar xzf - -C /app --strip-components 1 \
+    && rm -rf /app/JackettUpdater* \
     && chown -R root:root /app \
     && chmod -R 755 /app \
-    && printf "umask %d" "${UMASK}" >> /etc/bash.bashrc
+    && rm -rf /tmp/*
 
-USER kah
 COPY ./apps/jackett/entrypoint.sh /entrypoint.sh
+
+USER nobody:nogroup
+WORKDIR /config
+VOLUME ["/config"]
+
+ENTRYPOINT [ "/usr/bin/catatonit", "--" ]
 CMD ["/entrypoint.sh"]
 
 LABEL org.opencontainers.image.source="https://github.com/Jackett/Jackett"
